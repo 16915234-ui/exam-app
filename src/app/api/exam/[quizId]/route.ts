@@ -1,0 +1,3 @@
+﻿import { NextResponse } from "next/server";
+import { adminSupabase } from "@/lib-supabase";
+export async function GET(_:Request,{params}:{params:Promise<{quizId:string}>}){try{const {quizId}=await params;const db=adminSupabase();const {data:quiz,error}=await db.from("quizzes").select("id,title,description,required_fields,time_limit_minutes,is_active,questions(id,question_text,image_url,question_type,points,order_index,options(id,option_text,order_index))").eq("id",quizId).eq("is_active",true).single();if(error||!quiz)return NextResponse.json({error:"This exam is unavailable."},{status:404});return NextResponse.json({quiz})}catch{return NextResponse.json({error:"Exam service is not configured."},{status:503})}}
