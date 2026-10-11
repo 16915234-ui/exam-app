@@ -3,8 +3,9 @@ create extension if not exists pgcrypto;
 create table if not exists public.quizzes (
  id uuid primary key default gen_random_uuid(), title text not null, description text not null default '', is_active boolean not null default false,
  required_fields jsonb not null default '[]'::jsonb, time_limit_minutes integer check(time_limit_minutes is null or time_limit_minutes > 0),
- created_at timestamptz not null default now(), user_id uuid not null references auth.users(id) on delete cascade
+ created_at timestamptz not null default now(), user_id uuid not null references auth.users(id) on delete cascade, legacy_id text unique
 );
+alter table public.quizzes add column if not exists legacy_id text unique;
 create table if not exists public.questions (
  id uuid primary key default gen_random_uuid(), quiz_id uuid not null references public.quizzes(id) on delete cascade,
  question_text text not null, image_url text, question_type text not null check(question_type in ('multiple_choice','written')),
@@ -44,3 +45,7 @@ create policy "owners read answers" on public.answers for select to authenticate
 insert into storage.buckets(id,name,public,file_size_limit,allowed_mime_types) values('question-images','question-images',true,5242880,array['image/png','image/jpeg','image/webp']) on conflict(id) do nothing;
 create policy "authenticated admins upload question images" on storage.objects for insert to authenticated with check(bucket_id='question-images');
 create policy "public view question images" on storage.objects for select to public using(bucket_id='question-images');
+
+
+
+

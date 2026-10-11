@@ -1,0 +1,3 @@
+﻿import { createClient, type User } from "@supabase/supabase-js";
+import { adminSupabase } from "@/lib-supabase";
+export async function requireAdmin(request:Request):Promise<{user:User;db:ReturnType<typeof adminSupabase>}|null>{const token=request.headers.get("authorization")?.replace(/^Bearer\s+/i,"");const url=process.env.SUPABASE_URL;const key=process.env.SUPABASE_PUBLISHABLE_KEY;if(!token||!url||!key)return null;const auth=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});const {data,error}=await auth.auth.getUser(token);if(error||!data.user)return null;return{user:data.user,db:adminSupabase()}}
