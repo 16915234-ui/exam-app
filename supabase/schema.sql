@@ -40,6 +40,10 @@ create policy "owners manage questions" on public.questions for all to authentic
 create policy "owners manage options" on public.options for all to authenticated using(exists(select 1 from public.questions x join public.quizzes q on q.id=x.quiz_id where x.id=question_id and q.user_id=auth.uid())) with check(exists(select 1 from public.questions x join public.quizzes q on q.id=x.quiz_id where x.id=question_id and q.user_id=auth.uid()));
 create policy "owners read submissions" on public.submissions for select to authenticated using(exists(select 1 from public.quizzes q where q.id=quiz_id and q.user_id=auth.uid()));
 create policy "owners read answers" on public.answers for select to authenticated using(exists(select 1 from public.submissions s join public.quizzes q on q.id=s.quiz_id where s.id=submission_id and q.user_id=auth.uid()));
+drop policy if exists "owners update submissions" on public.submissions;
+create policy "owners update submissions" on public.submissions for update to authenticated using(exists(select 1 from public.quizzes q where q.id=quiz_id and q.user_id=auth.uid())) with check(exists(select 1 from public.quizzes q where q.id=quiz_id and q.user_id=auth.uid()));
+drop policy if exists "owners update answers" on public.answers;
+create policy "owners update answers" on public.answers for update to authenticated using(exists(select 1 from public.submissions s join public.quizzes q on q.id=s.quiz_id where s.id=submission_id and q.user_id=auth.uid())) with check(exists(select 1 from public.submissions s join public.quizzes q on q.id=s.quiz_id where s.id=submission_id and q.user_id=auth.uid()));
 -- Candidate access is only through server API using service role. Never grant anon table access: options.is_correct is confidential.
 insert into storage.buckets(id,name,public,file_size_limit,allowed_mime_types) values('question-images','question-images',true,5242880,array['image/png','image/jpeg','image/webp']) on conflict(id) do nothing;
 create policy "authenticated admins upload question images" on storage.objects for insert to authenticated with check(bucket_id='question-images');
