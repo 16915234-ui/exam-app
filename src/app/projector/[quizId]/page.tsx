@@ -3,6 +3,7 @@
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { ArrowLeft, ArrowRight, Expand, Minimize2, MonitorPlay } from "lucide-react";
+import "../projector.css";
 
 type Option = { id: string; option_text: string };
 type Question = { id: string; question_text: string; image_url: string | null; question_type: "multiple_choice" | "written"; points: number; options: Option[] };
